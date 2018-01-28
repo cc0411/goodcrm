@@ -11,6 +11,7 @@ class BaseAdmin(object):
     list_editable = []
 class CustomerAdmin(BaseAdmin):
     list_display = ['qq','name','source','date']
+    list_filter = ['qq','name','source','date']
 
 class CourseAdmin(BaseAdmin):
     list_display = ['name','price']

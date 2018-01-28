@@ -37,3 +37,26 @@ def build_table_row(obj,admin_class):
         row_ele += "<td>%s</td>" % column_data
 
     return mark_safe(row_ele)
+
+@register.simple_tag
+def  render_filter_ele(condtion,admin_class,filter_conditions):
+
+    select_ele = "<select  class='form-control' name='%s'><option>-------</option>" %condtion
+    field_obj = admin_class.model._meta.get_field(condtion)
+    if field_obj.choices:
+        seleted =''
+        for choice_item in field_obj.choices:
+            if filter_conditions.get[condtion] == str(choice_item[0]):
+                seleted = 'selected'
+            select_ele += '''<option value='%s'%s>%s</option>''' %(choice_item[0],seleted,choice_item[1])
+            seleted =''
+    if type(field_obj).__name__ =="ForeignKey":
+        seleted =''
+        for choice_item in field_obj.get_choices()[1:]:
+            if filter_conditions.get[condtion] == str(choice_item[0]):
+                seleted = 'selected'
+            select_ele += '''<option value='%s'%s>%s</option>''' % (choice_item[0],seleted, choice_item[1])
+            seleted =''
+    select_ele += "</select>"
+
+    return  mark_safe(select_ele)
