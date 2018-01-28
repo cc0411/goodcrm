@@ -1,64 +1,57 @@
-{% extends 'base.html' %}
+{% extends 'kadmin/index.html' %}
 {% load  tags %}
-{% block body %}
-<body>
 
-    <nav class="navbar navbar-inverse navbar-fixed-top">
-      <div class="container-fluid">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <a class="navbar-brand" href="#">CRM</a>
-        </div>
-        <div id="navbar" class="navbar-collapse collapse">
-          <ul class="nav navbar-nav navbar-right">
-            <li><a href="#">{{ request.user.userprofile.name }}</a></li>
-          </ul>
-        </div>
-      </div>
-    </nav>
+{%  block container %}
 
-<div class="container" style ="margin-top: 30px">
-    <div class="row">
-    <div  class="panel panel-default">
+{#    {{ admin_class.list_display }}#}
+    <div class="panel  panel-info">
         <div class="panel-heading">
-            <h3  class="panel-title"> 表格</h3>
+        <h3 class="panel-title">表格</h3>
         </div>
-        <div  class="panel-body">
-            {%  for app_name,app_tables in table_list.items %}
+        <div class="panel-body">
             <table class="table table-hover">
                 <thead>
                 <tr>
+                    {%  for column in admin_class.list_display %}
                     <th>
-                       {{ app_name }}
+                        {{ column }}
                     </th>
+                    {% endfor %}
                 </tr>
+
                 </thead>
-            <tbody>
-            {%  for table_name,admin in app_tables.items %}
+                <tbody>
+{#                {%  get_query_sets admin_class as query_sets %}#}
+                {% for obj in query_sets %}
                 <tr>
-                <td>
-                    {% render_app_name  admin %}
-                </td>
+                {% build_tables_row obj admin_class %}
                 </tr>
                 {% endfor %}
-            </tbody>
+                </tbody>
 
             </table>
-            {% endfor %}
+            <nav>
+                <ul class="pagination">
+                    {%  if query_sets.has_previous %}
+                    <li class=""><a href="?page={{ query_sets.previous_page_number }}">上一页</a></li>
+                    {% endif %}
+                {%  for loop_counter in query_sets.paginator.page_range %}
+                {%  render_page_ele loop_counter query_sets %}
+                {%  endfor %}
+                {%  if  query_sets.has_next %}
+                    <li class="">  <a href="?page={{ query_sets.next_page_number }}">下一页</a></li>
+                {%  endif %}
 
+                </ul>
 
-
-
+            </nav>
         </div>
-    </div>
-</div>
-</div>
 
-</body>
+
+    </div>
+
+
+
+    </div>
 
 {% endblock %}

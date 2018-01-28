@@ -1,9 +1,12 @@
 from django.shortcuts import render
-
+from app01 import  models
 # Create your views here.
 
 def  index(request):
-    return  render(request,'index.html')
+    column = models.Customer.objects.filter(id__gt=1)
+
+
+    return  render(request,'index.html',{'column_list':column})
 
 
 def sales(request):

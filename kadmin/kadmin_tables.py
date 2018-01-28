@@ -10,16 +10,18 @@ class BaseAdmin(object):
     filter_horizontal = []
     list_editable = []
 class CustomerAdmin(BaseAdmin):
-    list_display =  ['qq','name']
+    list_display = ['qq','name','source','date']
 
-class CustomerFollowUpAdmin(BaseAdmin):
-    list_display = ['customer','content']
+class CourseAdmin(BaseAdmin):
+    list_display = ['name','price']
 
 #获取app名字  models.UserProfile._meta.app_label
 #获取当前表名model_class._meta.model_name
 #model_class 表名
 
 def register(model_class,admin_class=None):
+
+
     if model_class._meta.app_label not in enabled_admin:
         enabled_admin[model_class._meta.app_label] ={}
         admin_obj = admin_class()
@@ -30,7 +32,7 @@ def register(model_class,admin_class=None):
 
 
 register(models.Customer,CustomerAdmin)
-register(models.CustomerFollowUp,CustomerFollowUpAdmin)
+#register(models.Course,CourseAdmin)
 
 
 
