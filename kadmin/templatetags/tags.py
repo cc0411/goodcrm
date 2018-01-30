@@ -1,4 +1,7 @@
 # -*- coding:utf-8 -*-
+import sys
+reload(sys)
+sys.setdefaultencoding("utf-8")
 from django import template
 from django.utils.safestring import mark_safe
 register = template.Library()
@@ -29,18 +32,56 @@ def build_table_row(obj,admin_class):
     return mark_safe(row_ele)
 
 @register.simple_tag
-def render_page_ele(loop_counter,query_sets):
+def render_page_ele(loop_counter,query_sets,filter_condtions):
+    filters =''
+    for k,v in filter_condtions.items():
+        filters +='&%s=%s' %(k,v)
+    if loop_counter <3 or loop_counter>query_sets.paginator.num_pages-2: #前两页和最后两页
+        ele_class = ""
+        if query_sets.number == loop_counter:
+            ele_class = "active"
+        ele = '''<li class="%s"><a href="?page=%s%s">%s</a></li>''' % (ele_class, loop_counter, filters, loop_counter)
 
     if abs(query_sets.number - loop_counter) <= 1:
         ele_class = ""
         if query_sets.number == loop_counter:
             ele_class = "active"
-        ele = '''<li class="%s"><a href="?page=%s">%s</a></li>''' %(ele_class,loop_counter,loop_counter)
+        ele = '''<li class="%s"><a href="?page=%s%s">%s</a></li>''' %(ele_class,loop_counter,filters,loop_counter)
 
         return mark_safe(ele)
 
     return ''
+@register.simple_tag
+def   build_paginators  (query_sets ,filter_condtions,previous_orderby ):
+    '''返回整个分页'''
+    page_btns = ''
+    filters = ''
+    for k, v in filter_condtions.items():
+        filters += '&%s=%s' % (k, v)
+    igore_display= False
+    for page_num in query_sets.paginator.page_range:
+        if page_num <3 or page_num>query_sets.paginator.num_pages-2:  #最前或最后两页
+            ele_class = ""
+            if query_sets.number == page_num:
+                igore_display = False
+                ele_class = "active"
+            page_btns += '''<li class="%s"><a href="?page=%s%s&o=%s">%s</a></li>''' % (
+            ele_class, page_num,previous_orderby, filters, page_num)
+        elif abs(query_sets.number - page_num) <= 2: #判断前后两页
+            ele_class = ""
+            if query_sets.number == page_num:
+                ele_class = "active"
+            page_btns = '''<li class="%s"><a href="?page=%s%s&o=%s">%s</a></li>''' % (
+            ele_class, page_num, filters,previous_orderby, page_num)
+        else: #显示....
+            if igore_display is False:
+                page_btns += '<li><a>....</a></li>'
+                igore_display = True
 
+
+
+
+    return  mark_safe(page_btns)
 
 @register.simple_tag
 def render_filter_ele(condtion,admin_class,filter_condtions):
@@ -65,3 +106,51 @@ def render_filter_ele(condtion,admin_class,filter_condtions):
             selected = ''
     select_ele += "</select>"
     return mark_safe(select_ele)
+
+@register.simple_tag
+def  build_table_header_column(column,orderby_key,filter_condtions):
+    filters = ''
+    for k,v in filter_condtions.items():
+        filters += "&%s=%s" %(k,v)
+
+    ele = '''<th><a href="?{filters}&o={orderby_key}">{column}</a>
+    {sort_icon}
+    </th>'''
+    if orderby_key:
+        if orderby_key.startswith("-"):
+            sort_icon = '''<span class="glyphicon glyphicon-chevron-up"></span>'''
+        else:
+            sort_icon = '''<span class="glyphicon glyphicon-chevron-down"></span>'''
+
+        if orderby_key.strip("-") == column: #排序的就是这个字段
+            orderby_key =orderby_key
+        else:
+            orderby_key = column
+            sort_icon = ''
+
+    else:  #没有排序
+        orderby_key = column
+        sort_icon = ''
+
+    ele = ele.format(orderby_key=orderby_key, column=column,sort_icon=sort_icon,filters=filters)
+    return mark_safe(ele )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

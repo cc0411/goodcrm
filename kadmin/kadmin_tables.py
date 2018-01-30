@@ -1,4 +1,5 @@
 # -*- coding:utf-8 -*-
+
 from app01 import  models
 #app名称enabled_admin
 enabled_admin = {}
@@ -11,8 +12,8 @@ class BaseAdmin(object):
     list_editable = []
     list_per_page = 2
 class CustomerAdmin(BaseAdmin):
-    list_display = ['qq','name','source','date']
-    list_filter = ['qq','name','source','date']
+    list_display = ['qq','phone','consultant','source','date']
+    list_filter = ['consultant','source','date']
 
 class CourseAdmin(BaseAdmin):
     list_display = ('name','price')
