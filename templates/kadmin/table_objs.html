@@ -12,14 +12,21 @@
         <div class="row">
         <form method="get" class="" >
              {% for condtion in admin_class.list_filter %}
-                <div class="col-lg-3">
+                <div class="col-lg-2">
                 <span>{{ condtion }}</span>
                  {% render_filter_ele condtion admin_class filter_condtions %}
                 </div>
             {%  endfor %}
             <div style="padding-top: 20px">
+                <button type="submit" class="btn btn-success">过滤</button>
+            </div>
+            <div class="col-lg-2" style="margin-top: 20px">
+                 <input type="search" name="_q" class="form-control"  value="{{ search_text }}" placeholder="search by {% for search_field in admin_class.search_fields %}{{ search_field }},{% endfor %} ">
+                      </div>
+                      <div style="padding-top: 20px">
                 <button type="submit" class="btn btn-success">搜索</button>
             </div>
+
 
         </form>
 

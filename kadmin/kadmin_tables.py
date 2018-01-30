@@ -14,6 +14,7 @@ class BaseAdmin(object):
 class CustomerAdmin(BaseAdmin):
     list_display = ['qq','phone','consultant','source','date']
     list_filter = ['consultant','source','date']
+    search_fields = ('qq','name')
 
 class CourseAdmin(BaseAdmin):
     list_display = ('name','price')
