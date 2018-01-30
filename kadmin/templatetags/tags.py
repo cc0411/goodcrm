@@ -4,6 +4,7 @@ reload(sys)
 sys.setdefaultencoding("utf-8")
 from django import template
 from django.utils.safestring import mark_safe
+from django.utils.timezone import datetime,timedelta
 register = template.Library()
 
 @register.simple_tag
@@ -84,14 +85,15 @@ def   build_paginators  (query_sets ,filter_condtions,previous_orderby ):
     return  mark_safe(page_btns)
 
 @register.simple_tag
-def render_filter_ele(condtion,admin_class,filter_condtions):
-    select_ele = '''<select class="form-control" name='%s' ><option value=''>----</option>''' %condtion
-    field_obj = admin_class.model._meta.get_field(condtion)
+def render_filter_ele(filter_field,admin_class,filter_condtions):
+    #select_ele = '''<select class="form-control" name='%s' ><option value=''>----</option>''' %filter_field
+    select_ele = '''<select class="form-control" name='{filter_field}' ><option value=''>----</option>'''
+    field_obj = admin_class.model._meta.get_field(filter_field)
     if field_obj.choices:
         selected = ''
         for choice_item in field_obj.choices:
-            print("choice",choice_item,filter_condtions.get(condtion),type(filter_condtions.get(condtion)))
-            if filter_condtions.get(condtion) == str(choice_item[0]):
+            print("choice",choice_item,filter_condtions.get(filter_field),type(filter_condtions.get(filter_field)))
+            if filter_condtions.get(filter_field) == str(choice_item[0]):
                 selected ="selected"
 
             select_ele += '''<option value='%s' %s>%s</option>''' %(choice_item[0],selected,choice_item[1])
@@ -100,11 +102,32 @@ def render_filter_ele(condtion,admin_class,filter_condtions):
     if type(field_obj).__name__ == "ForeignKey":
         selected = ''
         for choice_item in field_obj.get_choices()[1:]:
-            if filter_condtions.get(condtion) == str(choice_item[0]):
+            if filter_condtions.get(filter_field) == str(choice_item[0]):
                 selected = "selected"
             select_ele += '''<option value='%s' %s>%s</option>''' %(choice_item[0],selected,choice_item[1])
             selected = ''
+    if type(field_obj).__name__ in ['DateField','DateTimeField']:
+        date_els = []
+        today_ele = datetime.now().date()
+        date_els.append(['今天', datetime.now().date()])
+        date_els.append(["昨天", today_ele - timedelta(days=1)])
+        date_els.append(["近7天", today_ele - timedelta(days=7)])
+        date_els.append(["本月", today_ele.replace(day=1)])
+        date_els.append(["近30天", today_ele - timedelta(days=30)])
+        date_els.append(["近90天", today_ele - timedelta(days=90)])
+        date_els.append(["近180天", today_ele - timedelta(days=180)])
+        date_els.append(["本年", today_ele.replace(month=1, day=1)])
+        date_els.append(["近一年", today_ele - timedelta(days=365)])
+
+        selected = ''
+        for item in date_els:
+            select_ele += '''<option value='%s' %s>%s</option>''' % (item[1], selected, item[0])
+
+        filter_field_name = "%s__gte" % filter_field
+    else:
+        filter_field_name = filter_field
     select_ele += "</select>"
+    select_ele = select_ele.format(filter_field=filter_field_name)
     return mark_safe(select_ele)
 
 @register.simple_tag
